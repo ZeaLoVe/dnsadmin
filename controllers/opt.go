@@ -52,7 +52,7 @@ func (c *SyncAllController) Get() {
 	num, err := models.SyncAll()
 	var msg string
 	if err == nil {
-		msg = fmt.Sprint("SyncAll records %v all success", num)
+		msg = fmt.Sprintf("SyncAll records %v all success", num)
 	} else {
 		msg = fmt.Sprintf("SyncAll records with success number:%v.\nError List:%v", num, err.Error())
 	}

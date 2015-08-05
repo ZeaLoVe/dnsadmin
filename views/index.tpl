@@ -27,7 +27,7 @@ with (thisform){
     <h1 class="logo">Welcome to {{.Website}}</h1>
   </header>
       <div class="author">
-      <p>&nbsp;</p>
+      <p>ps:修改DNS记录就是添加一个相同域名的记录</p>
       <form name="input" action="/insert" onsubmit="return validate_form(this)" method="post">
 域&nbsp;名:
 <input type="domain" name="domain" />

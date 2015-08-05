@@ -53,7 +53,11 @@ func Save(rec Records) error {
 		}
 	} else {
 		_, err := O.Insert(&rec)
-		return err
+		if err != nil {
+			return err
+		} else {
+			return Sync(rec)
+		}
 	}
 }
 
