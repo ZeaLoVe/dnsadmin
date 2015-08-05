@@ -32,7 +32,7 @@ with (thisform){
 域&nbsp;名:
 <input type="domain" name="domain" />
 </br>
-内&nbsp;容:
+IP地址:
 <input type="content" name="content" />
 </br>
 时&nbsp;效:
