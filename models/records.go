@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
@@ -26,7 +27,11 @@ type Records struct {
 var O orm.Ormer
 
 func init() {
-	orm.RegisterDataBase("default", "mysql", "user_9g8j2stroh:Oqh16lsuRj@tcp(172.24.133.50:3306)/dev_mysql_clj0727?charset=utf8", 30)
+	connStr := beego.AppConfig.String("connstr")
+	if connStr == "" {
+		connStr = "user_9g8j2stroh:Oqh16lsuRj@tcp(172.24.133.50:3306)/dev_mysql_clj0727?charset=utf8"
+	}
+	orm.RegisterDataBase("default", "mysql", connStr, 30)
 	orm.RegisterModel(new(Records))
 	orm.RunSyncdb("default", false, true)
 	O = orm.NewOrm()

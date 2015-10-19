@@ -13,4 +13,5 @@ func init() {
 	beego.Router("/disable/*", &controllers.DisableController{})
 	beego.Router("/enable/*", &controllers.EnableController{})
 	beego.Router("/syncall", &controllers.SyncAllController{})
+	beego.Router("/test", &controllers.TestController{})
 }
