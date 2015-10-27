@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/coreos/go-etcd/etcd"
 	"log"
 	"net"
@@ -87,7 +88,12 @@ func deleteService(name string) error {
 }
 
 func init() {
-	machines = []string{"http://etcd.product.sdp.nd:2379"} //set default
+	etcdDomain := beego.AppConfig.String("etcd")
+	if etcdDomain == "" {
+		etcdDomain = "etcd.product.sdp.nd"
+	}
+
+	machines = []string{fmt.Sprintf("http://%s:2379", etcdDomain)} //set default
 }
 
 func Sync(rec Records) error {
