@@ -4,12 +4,12 @@
 <head>
   <title>{{.Website}}</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/default/easyui.css">
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/color.css">
-    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/demo/demo.css">
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.6.min.js"></script>
-    <script type="text/javascript" src="http://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../static/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../static/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="../static/easyui/themes/color.css">
+    <link rel="stylesheet" type="text/css" href="../static/easyui/demo/demo.css">
+    <script type="text/javascript" src="../static/js/jquery-1.6.min.js"></script>
+    <script type="text/javascript" src="../static/easyui/jquery.easyui.min.js"></script>
 	<script type="text/javascript">
 function validate_form(thisform){
 with (thisform){
@@ -36,7 +36,7 @@ with (thisform){
 	<div class="easyui-panel" title="添加记录">
 	<div style="padding:10px 30px 20px 30px">
       <form name="input" action="/insert" method="post" onsubmit="return validate_form(this)">
-	<table cellpadding="5">
+	<table class="altrowstable" id="add_domain" cellpadding="5">
 <tr>
 <td>域名:</td>
 <td><input class="easyui-textbox" type="domain" name="domain" data-options="required:true"/></td>
@@ -64,7 +64,7 @@ with (thisform){
 	<div style="padding:10px 30px 20px 30px">
 		
       <form name="form2" method="post" action="/search">
-        <table cellpadding="5">
+        <table class="altrowstable" id="alternatecolor" cellpadding="5">
 		<tr>
 		<td><label>
           <input type="text" name="searchDNS" id="searchDNS">
