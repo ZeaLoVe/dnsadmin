@@ -93,6 +93,7 @@ func init() {
 		etcdDomain = "etcd.product.sdp.nd"
 	}
 
+	log.Printf("Init etcd addr:%s\n", etcdDomain)
 	machines = []string{fmt.Sprintf("http://%s:2379", etcdDomain)} //set default
 }
 
