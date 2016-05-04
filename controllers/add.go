@@ -11,6 +11,13 @@ type AddController struct {
 }
 
 func (c *AddController) Get() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
+	c.Data["UserName"] = username
 	c.Data["Website"] = "DNSadmin"
 	c.TplNames = "add.tpl"
 }
@@ -20,6 +27,12 @@ type InsertController struct {
 }
 
 func (c *InsertController) Post() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
 	domain := c.GetString("domain")
 	content := c.GetString("content")
 	ttl, err := c.GetInt("ttl")

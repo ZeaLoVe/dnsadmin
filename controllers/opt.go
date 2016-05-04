@@ -11,6 +11,13 @@ type EnableController struct {
 }
 
 func (c *EnableController) Get() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
+	c.Data["UserName"] = username
 	c.Data["Website"] = "DNSadmin"
 	arg := c.Ctx.Input.Param(":splat")
 	var rec models.Records
@@ -30,6 +37,13 @@ type DisableController struct {
 }
 
 func (c *DisableController) Get() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
+	c.Data["UserName"] = username
 	c.Data["Website"] = "DNSadmin"
 	arg := c.Ctx.Input.Param(":splat")
 	var rec models.Records
@@ -49,6 +63,12 @@ type SyncAllController struct {
 }
 
 func (c *SyncAllController) Get() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
 	num, err := models.SyncAll()
 	var msg string
 	if err == nil {

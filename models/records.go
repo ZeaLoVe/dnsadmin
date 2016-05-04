@@ -24,6 +24,17 @@ type Records struct {
 	Modifier_ip string `orm:"size(100)"`
 }
 
+type UersInfoResponse struct {
+	UserInfo `json:"user,omitempty"`
+}
+
+type UserInfo struct {
+	Id    int    `json:"id,omitempty"`
+	Name  string `json:"name,omitempty"`
+	Cname string `json:"cnname,omitempty"`
+	Role  int    `json:"role,omitempty"`
+}
+
 var O orm.Ormer
 
 func init() {

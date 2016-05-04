@@ -30,7 +30,7 @@ with (thisform){
 
 <body>
   <header>
-    <h1 class="logo">Welcome to {{.Website}}</h1>
+    <h1 class="logo">Welcome to {{.Website}} , {{.UserName}} !</h1>
   </header>
       <p>ps:修改DNS记录就是添加一个相同域名的记录</p>
 	<div class="easyui-panel" title="添加记录">

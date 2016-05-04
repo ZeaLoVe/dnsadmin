@@ -10,6 +10,13 @@ type SearchController struct {
 }
 
 func (c *SearchController) Post() {
+	sess := c.StartSession()
+	username := sess.Get("user_name")
+	if username == "" {
+		c.Ctx.Redirect(302, "/")
+		return
+	}
+	c.Data["UserName"] = username
 	c.Data["Website"] = "DNSadmin"
 
 	var res []models.Records
