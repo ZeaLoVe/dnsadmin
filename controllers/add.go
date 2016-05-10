@@ -52,8 +52,10 @@ func (c *InsertController) Post() {
 	}
 	err = models.Save(rec)
 	if err == nil {
+		beego.BeeLogger.Info("user:%v add a domain< %v > success", username, domain)
 		c.Ctx.Redirect(302, "/")
 	} else {
+		beego.BeeLogger.Info("user:%v add a domain< %v > fail with err:%v", username, domain, err.Error())
 		msg := fmt.Sprintf("Fail to save info in database with err:%v", err.Error())
 		c.Ctx.WriteString(msg)
 	}
