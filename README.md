@@ -54,3 +54,21 @@ type Records struct {
 	Modifier_ip string `orm:"size(100)"`
 	
 }
+
+conf/app.conf
+
+appname = dnsadmin #app name
+
+httpport = 8080 #listen port of dnsadmin
+
+domain = 127.0.0.1 #your domain for dnsadmin
+
+runmode = dev
+
+connstr = #your mysql connection string
+
+etcd = # your etcd domain
+
+uic = # your falcon uic domain
+
+uicport = # your falcon uic listen port
