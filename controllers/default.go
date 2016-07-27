@@ -39,6 +39,10 @@ func (c *MainController) redirect_to_sso() {
 
 func (c *MainController) Prepare() {
 	sess := c.StartSession()
+	flag, _ := beego.AppConfig.Bool("auth")
+	if flag == false {
+		c.SetSession("user_name", "NotNeedAuth")
+	}
 	user_name := sess.Get("user_name")
 	if user_name == nil {
 		//fmt.Println("empty user name")
