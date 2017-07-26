@@ -3,6 +3,7 @@ package controllers
 import (
 	"dnsadmin/models"
 	"fmt"
+
 	"github.com/astaxie/beego"
 )
 
@@ -10,27 +11,23 @@ type EnableController struct {
 	beego.Controller
 }
 
-func (c *EnableController) Get() {
-	sess := c.StartSession()
-	username := sess.Get("user_name")
-	if username == "" {
-		c.Ctx.Redirect(302, "/")
-		return
-	}
-	c.Data["UserName"] = username
-	c.Data["Website"] = "DNSadmin"
+func (c *EnableController) Post() {
 	arg := c.Ctx.Input.Param(":splat")
 	var rec models.Records
 	rec.Name = arg
 	rec.Modifier_ip = c.Ctx.Request.RemoteAddr
 	err := models.Enable(rec)
+	var resp Dto
 	if err == nil {
-		beego.BeeLogger.Info("user:%v enable a domain< %v > success", username, rec.Name)
-		c.Ctx.Redirect(302, "/")
+		resp.Code = "ok"
+		resp.Msg = fmt.Sprintf("enable %v success", rec.Name)
+		c.Data["json"] = resp
+		c.ServeJSON()
 	} else {
-		beego.BeeLogger.Info("user:%v add a domain< %v > fail with err:%v", username, rec.Name, err.Error())
-		msg := fmt.Sprintf("Fail to enable domain %v with err:%v", arg, err.Error())
-		c.Ctx.WriteString(msg)
+		resp.Code = "error"
+		resp.Msg = fmt.Sprintf("enable %v fail, with error %v", rec.Name, err.Error())
+		c.Data["json"] = resp
+		c.ServeJSON()
 	}
 }
 
@@ -38,27 +35,23 @@ type DisableController struct {
 	beego.Controller
 }
 
-func (c *DisableController) Get() {
-	sess := c.StartSession()
-	username := sess.Get("user_name")
-	if username == "" {
-		c.Ctx.Redirect(302, "/")
-		return
-	}
-	c.Data["UserName"] = username
-	c.Data["Website"] = "DNSadmin"
+func (c *DisableController) Post() {
 	arg := c.Ctx.Input.Param(":splat")
 	var rec models.Records
 	rec.Name = arg
 	rec.Modifier_ip = c.Ctx.Request.RemoteAddr
 	err := models.Disable(rec)
+	var resp Dto
 	if err == nil {
-		beego.BeeLogger.Info("user:%v disable a domain< %v > success", username, rec.Name)
-		c.Ctx.Redirect(302, "/")
+		resp.Code = "ok"
+		resp.Msg = fmt.Sprintf("disable %v success", rec.Name)
+		c.Data["json"] = resp
+		c.ServeJSON()
 	} else {
-		beego.BeeLogger.Info("user:%v disable a domain< %v > fail with err:%v", username, rec.Name, err.Error())
-		msg := fmt.Sprintf("Fail to disable domain %v with err:%v", arg, err.Error())
-		c.Ctx.WriteString(msg)
+		resp.Code = "error"
+		resp.Msg = fmt.Sprintf("disable %v fail, with error %v", rec.Name, err.Error())
+		c.Data["json"] = resp
+		c.ServeJSON()
 	}
 }
 
@@ -66,7 +59,7 @@ type SyncAllController struct {
 	beego.Controller
 }
 
-func (c *SyncAllController) Get() {
+func (c *SyncAllController) Post() {
 	sess := c.StartSession()
 	username := sess.Get("user_name")
 	if username == "" {

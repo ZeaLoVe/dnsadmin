@@ -4,9 +4,10 @@ import (
 	"dnsadmin/models"
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/astaxie/beego"
 )
 
 type MainController struct {
@@ -22,8 +23,7 @@ func (c *MainController) Get() {
 	}
 	c.Data["UserName"] = username
 	c.Data["Website"] = "DNSadmin"
-	c.Layout = "index.tpl"
-	c.TplNames = "data.tpl"
+	c.TplName = "index.tpl"
 }
 
 func (c *MainController) redirect_to_sso() {
@@ -33,7 +33,8 @@ func (c *MainController) redirect_to_sso() {
 	if err != nil {
 		return
 	}
-	callback := fmt.Sprintf("http://%v:%v", beego.AppConfig.String("domain"), beego.AppConfig.String("httpport"))
+	//	callback := fmt.Sprintf("http://%v", beego.AppConfig.String("domain"), beego.AppConfig.String("httpport"))
+	callback := fmt.Sprintf("http://%v", c.Ctx.Request.Host)
 	c.Redirect(c.getLoginUrl(sig, callback), 302)
 }
 
@@ -45,9 +46,7 @@ func (c *MainController) Prepare() {
 	}
 	user_name := sess.Get("user_name")
 	if user_name == nil {
-		//fmt.Println("empty user name")
 		sig := c.Ctx.GetCookie("sig")
-		//fmt.Printf("sig from cookie:%v\n", sig)
 		if sig == "" {
 			c.redirect_to_sso()
 			return
@@ -71,7 +70,6 @@ func (c *MainController) getLoginUrl(sig string, callback string) string {
 
 func (c *MainController) genSig() (string, error) {
 	url := fmt.Sprintf("%v:%v/sso/sig", beego.AppConfig.String("uic"), beego.AppConfig.String("uicport"))
-	//fmt.Printf("url:%v", url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err
@@ -103,7 +101,6 @@ func (c *MainController) username_form_sso(sig string) string {
 	if body != nil {
 		defer resp.Body.Close()
 	}
-	//fmt.Printf("body:%v\n", string(body))
 	var userinfoResp models.UersInfoResponse
 	err = json.Unmarshal(body, &userinfoResp)
 	if userinfoResp.UserInfo.Name == "" {

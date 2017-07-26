@@ -2,15 +2,14 @@ package models
 
 import (
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"strings"
 	"time"
-)
 
-const SKYDNS_DOMAIN = ".sdp"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
+	_ "github.com/go-sql-driver/mysql"
+)
 
 type Records struct {
 	Name        string `orm:"size(255);pk"`
@@ -35,6 +34,36 @@ type UserInfo struct {
 	Role  int    `json:"role,omitempty"`
 }
 
+type OutputRecords struct {
+	Name     string `json:"name"`
+	Content  string `json:"content"`
+	Ttl      int    `json:"ttl"`
+	Auth     string `json:"auth"`
+	Disabled int    `json:"disabled"`
+}
+
+type DomiansResponse struct {
+	Total int       `json:"total"`
+	Items []Records `json:"rows"`
+}
+
+func GetOutput(list []Records) []OutputRecords {
+	var outputlist []OutputRecords
+	var tmp = OutputRecords{
+		Ttl:      0,
+		Disabled: 0,
+	}
+	for _, rec := range list {
+		tmp.Auth = rec.Auth
+		tmp.Content = rec.Content
+		tmp.Disabled = rec.Disabled
+		tmp.Name = rec.Name
+		tmp.Ttl = rec.Ttl
+		outputlist = append(outputlist, tmp)
+	}
+	return outputlist
+}
+
 var O orm.Ormer
 
 func init() {
@@ -52,51 +81,87 @@ func Save(rec Records) error {
 	if rec.Name == "" {
 		return fmt.Errorf("key name is empty")
 	}
-	if !strings.HasSuffix(rec.Name, SKYDNS_DOMAIN) {
-		return fmt.Errorf("Not domain end with %v", SKYDNS_DOMAIN)
-	}
 	var tmp Records
 	tmp.Name = rec.Name
 	err := O.Read(&tmp)
 	rec.Change_date = int(time.Now().Unix())
 	if err == nil {
-		num, err := O.Update(&rec, "Content", "Ttl", "Change_date", "Modifier_ip")
-		log.Printf("Updata %v lines in save err:%v\n", num, err)
-		if err != nil {
-			return err
+		if err = SetRecords(rec.Name, rec.Content, uint64(rec.Ttl)); err == nil {
+			num, err := O.Update(&rec, "Content", "Ttl", "Change_date", "Modifier_ip")
+			log.Printf("Updata %v lines in save err:%v\n", num, err)
+			if err != nil {
+				return err
+			}
 		} else {
-			return Sync(rec)
+			return err
 		}
 	} else {
-		_, err := O.Insert(&rec)
-		if err != nil {
-			return err
+		if err = SetRecords(rec.Name, rec.Content, uint64(rec.Ttl)); err == nil {
+			_, err := O.Insert(&rec)
+			if err != nil {
+				return err
+			}
 		} else {
-			return Sync(rec)
+			return err
 		}
 	}
+	return nil
+}
+
+func Delete(rec Records) error {
+	if rec.Name == "" {
+		return fmt.Errorf("key name is empty")
+	}
+
+	if err := UnSetRecords(rec.Name); err == nil {
+		_, err := O.Delete(&rec)
+		if err != nil {
+			return err
+		}
+	} else {
+		msg := err.Error()
+		if strings.Contains(msg, "Key not found") {
+			_, err := O.Delete(&rec)
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+	return nil
 }
 
 func Enable(rec Records) error {
-	rec.Disabled = 0
-	rec.Change_date = int(time.Now().Unix())
-	num, err := O.Update(&rec, "Disabled", "Change_date", "Modifier_ip")
-	if num >= 1 {
-		return Sync(rec)
+	err := O.Read(&rec)
+	if err != nil {
+		return err
+	}
+	if err := SetRecords(rec.Name, rec.Content, uint64(rec.Ttl)); err == nil {
+		rec.Disabled = 0
+		rec.Change_date = int(time.Now().Unix())
+		num, err := O.Update(&rec, "Disabled", "Change_date", "Modifier_ip")
+		if num < 1 {
+			return err
+		}
 	} else {
 		return err
 	}
+	return nil
 }
 
 func Disable(rec Records) error {
-	rec.Disabled = 1
-	rec.Change_date = int(time.Now().Unix())
-	num, err := O.Update(&rec, "Disabled", "Change_date", "Modifier_ip")
-	if num >= 1 {
-		return Sync(rec)
+	if err := UnSetRecords(rec.Name); err == nil {
+		rec.Disabled = 1
+		rec.Change_date = int(time.Now().Unix())
+		num, err := O.Update(&rec, "Disabled", "Change_date", "Modifier_ip")
+		if num < 1 {
+			return err
+		}
 	} else {
 		return err
 	}
+	return nil
 }
 
 func Search(keyword string) ([]Records, error) {

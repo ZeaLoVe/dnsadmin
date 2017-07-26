@@ -2,69 +2,10 @@ package models
 
 import (
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/coreos/go-etcd/etcd"
 	"log"
-	"net"
 	"path"
 	"strings"
 )
-
-var machines []string
-
-func getipByName(name string) []net.IP {
-	ns, err := net.LookupIP(name)
-	if err != nil {
-		fmt.Println("no ips for the name")
-		return ns
-	} else {
-		fmt.Println("get ips for " + name)
-		return ns
-	}
-}
-
-func getData(key string) string {
-	client := etcd.NewClient(machines)
-	resp, err := client.Get(key, false, true)
-	if err != nil {
-		return err.Error()
-	} else {
-		if resp.Node.Value != "" {
-			return "key:" + resp.Node.Key + "value:" + resp.Node.Value + "expiration:" + resp.Node.Expiration.String()
-		} else {
-			return ""
-		}
-	}
-}
-
-func setData(key string, value string, ttl uint64) error {
-	client := etcd.NewClient(machines)
-	_, err := client.Set(key, value, ttl)
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
-
-func deleteData(key string) error {
-	client := etcd.NewClient(machines)
-	_, err := client.Delete(key, false)
-	if err != nil {
-		return err
-	} else {
-		return nil
-	}
-}
-
-func getService(name string) string {
-	tmpList := strings.Split(name, ".")
-	for i, j := 0, len(tmpList)-1; i < j; i, j = i+1, j-1 {
-		tmpList[i], tmpList[j] = tmpList[j], tmpList[i]
-	}
-	key := path.Join(append([]string{"/skydns/"}, tmpList...)...)
-	return getData(key)
-}
 
 func setService(name string, ip string, ttl uint64) error {
 	tmpList := strings.Split(name, ".")
@@ -75,7 +16,7 @@ func setService(name string, ip string, ttl uint64) error {
 	value := "{\"host\":\"" + ip + "\"}"
 	fmt.Println("insert key: " + key)
 	fmt.Println("insert value: " + value)
-	return setData(key, value, ttl)
+	return DefaultBackend.UpdateKV(key, value, ttl)
 }
 
 func deleteService(name string) error {
@@ -84,17 +25,20 @@ func deleteService(name string) error {
 		tmpList[i], tmpList[j] = tmpList[j], tmpList[i]
 	}
 	key := path.Join(append([]string{"/skydns/"}, tmpList...)...)
-	return deleteData(key)
+	_, err := DefaultBackend.DeleteKey(key)
+	return err
 }
 
-func init() {
-	etcdDomain := beego.AppConfig.String("etcd")
-	if etcdDomain == "" {
-		etcdDomain = "etcd.product.sdp.nd"
-	}
+func DeleteService(name string) error {
+	return deleteService(name)
+}
 
-	log.Printf("Init etcd addr:%s\n", etcdDomain)
-	machines = []string{fmt.Sprintf("http://%s:2379", etcdDomain)} //set default
+func SetRecords(name string, content string, ttl uint64) error {
+	return setService(name, content, ttl)
+}
+
+func UnSetRecords(name string) error {
+	return deleteService(name)
 }
 
 func Sync(rec Records) error {
@@ -102,9 +46,9 @@ func Sync(rec Records) error {
 	if rec.Disabled == 1 { //停用
 		return deleteService(rec.Name)
 	}
-	if rec.Ttl == 0 {
-		rec.Ttl = 360000000
-	}
+	//	if rec.Ttl == 0 {
+	//		rec.Ttl = 360000000
+	//	}
 	flag := setService(rec.Name, rec.Content, uint64(rec.Ttl))
 	log.Printf("SetService called with %v", flag)
 	return flag
